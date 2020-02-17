@@ -153,7 +153,7 @@ class TrafimageMaps extends React.PureComponent {
           cartaroUrl={cartaroUrl}
           appBaseUrl={appBaseUrl}
           permissionUrl={permissionUrl}
-          vectorTilesKey={vectorTilesKey}
+          vectorTilesKey="5cc87b12d7c5370001c1d65574b4bb71771c48848d7b79e21e26d756"
           vectorTilesUrl={vectorTilesUrl}
         />
       </Provider>

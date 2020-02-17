@@ -47,9 +47,11 @@ class MapboxStyleLayer extends Layer {
     this.queryRenderedLayersFilter = options.queryRenderedLayersFilter;
     this.highlightedFeatures = [];
     this.selectedFeatures = [];
+    this.beforeId = options.beforeId;
     this.styleLayers =
       (options.styleLayer ? [options.styleLayer] : options.styleLayers) || [];
     this.addStyleLayers = this.addStyleLayers.bind(this);
+    this.clickCallbacks = [];
     this.onLoad = this.onLoad.bind(this);
     if (options.filters) {
       this.addDynamicFilters =
@@ -111,10 +113,20 @@ class MapboxStyleLayer extends Layer {
           this.addDynamicFilters();
         }
       }),
-      // this.addDynamicFilters &&
-      //   this.map.on('moveend', () => {
-      //     this.addDynamicFilters();
-      //   }),
+      // Listen to click events
+      this.map.on('singleclick', evt => {
+        if (!this.clickCallbacks.length) {
+          return;
+        }
+
+        this.getFeatureInfoAtCoordinate(evt.coordinate).then(
+          ({ features, layer, coordinate }) => {
+            this.clickCallbacks.forEach(callback => {
+              callback(features, layer, coordinate);
+            });
+          },
+        );
+      }),
     );
   }
 
@@ -135,7 +147,7 @@ class MapboxStyleLayer extends Layer {
     const { mbMap } = this.mapboxLayer;
     this.styleLayers.forEach(styleLayer => {
       if (!mbMap.getLayer(styleLayer.id)) {
-        mbMap.addLayer(styleLayer);
+        mbMap.addLayer(styleLayer, this.beforeId);
       }
     });
     applyLayoutVisibility(mbMap, this.getVisible(), this.styleLayersFilter);
@@ -160,6 +172,20 @@ class MapboxStyleLayer extends Layer {
   }
 
   /**
+   * Listens to click events on the layer.
+   * @param {function} callback Callback function, called with the clicked
+   *   features (https://openlayers.org/en/latest/apidoc/module-ol_Feature.html),
+   *   the layer instance and the click coordinate.
+   */
+  onClick(callback) {
+    if (typeof callback === 'function') {
+      this.clickCallbacks.push(callback);
+    } else {
+      throw new Error('callback must be of type function.');
+    }
+  }
+
+  /**
    * Request feature information for a given coordinate.
    * @param {ol.Coordinate} coordinate Coordinate to request the information at.
    * @returns {Promise<Object>} Promise with features, layer and coordinate
@@ -180,10 +206,11 @@ class MapboxStyleLayer extends Layer {
         validate: false,
       })
       .then(featureInfo => {
-        const features = featureInfo.features.filter(feature => {
+        const features = featureInfo.features.filter((feature, idx) => {
           return this.featureInfoFilter(
             feature,
             this.map.getView().getResolution(),
+            idx,
           );
         });
         this.highlight(features);
@@ -240,10 +267,36 @@ class MapboxStyleLayer extends Layer {
     });
   }
 
+  setSelectState(features = [], state) {
+    const options = this.styleLayers[0];
+    features.forEach(feature => {
+      if ((!options.source && !options['source-layer']) || !feature.getId()) {
+        if (!feature.getId()) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            "No feature's id found. To use the feature state functionnality, tiles must be generated with --generate-ids. See https://github.com/mapbox/tippecanoe#adding-calculated-attributes.",
+            feature.getId(),
+            feature.getProperties(),
+          );
+        }
+        return;
+      }
+
+      this.mapboxLayer.mbMap.setFeatureState(
+        {
+          id: feature.getId(),
+          source: options.source,
+          sourceLayer: options['source-layer'],
+        },
+        { select: state },
+      );
+    });
+  }
+
   select(features = []) {
-    this.setHoverState(this.selectedFeatures, false);
+    this.setSelectState(this.selectedFeatures, false);
     this.selectedFeatures = features;
-    this.setHoverState(this.selectedFeatures, true);
+    this.setSelectState(this.selectedFeatures, true);
   }
 
   highlight(features = []) {
@@ -255,7 +308,8 @@ class MapboxStyleLayer extends Layer {
     });
 
     // Remove previous highlight
-    this.setHoverState(filtered, false);
+    console.log('remove highlight', filtered[0]);
+    this.setHoverState(this.highlightedFeatures, false);
     this.highlightedFeatures = features;
 
     // Add highlight

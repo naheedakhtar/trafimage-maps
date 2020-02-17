@@ -104,16 +104,21 @@ export function StyleGuideRenderer({
 }) {
   const [apiKey, setApiKey] = useState();
   useEffect(() => {
-    fetch('https://developer.geops.io/publickey')
-      .then(response => response.json())
-      .then(data => {
-        setApiKey(data.key);
-      })
-      .catch(() => {
-        setApiKey('error');
-        // eslint-disable-next-line no-console
-        console.error('Request to get the apiKey failed');
-      });
+    setApiKey('5cc87b12d7c5370001c1d65574b4bb71771c48848d7b79e21e26d756');
+
+    // fetch('https://developer.geops.io/publickey')
+    //   .then(response => response.json())
+    //   .then(data => {
+
+    //     //setApiKey(data.key);
+    //   })
+    //   .catch(() => {
+    //     console.log('catch');
+    //     //{"key":"5cc87b12d7c5370001c1d65574b4bb71771c48848d7b79e21e26d756","success":true}
+    //     setApiKey('5cc87b12d7c5370001c1d65574b4bb71771c48848d7b79e21e26d756');
+    //     // eslint-disable-next-line no-console
+    //     console.error('Request to get the apiKey failed');
+    //   });
   }, []);
 
   if (!apiKey) {

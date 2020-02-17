@@ -58,6 +58,15 @@ export const fetchPermissionsInfos = appBaseUrl => dispatch => {
           permissions: [],
         },
       });
+    })
+    .catch(() => {
+      dispatch({
+        type: SET_PERMISSIONS_INFOS,
+        data: {
+          user: null,
+          permissions: [],
+        },
+      });
     });
 };
 

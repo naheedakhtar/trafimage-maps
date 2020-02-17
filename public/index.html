@@ -66,14 +66,10 @@
       };
 
       window.onload = function() {
-        fetch('https://developer.geops.io/publickey')
-          .then(response => response.json())
-          .then(data => {
-            changeAttr('apiKey', data.key)
-          })
-          .catch(() => {
-            console.error('Request to get the apiKey failed');
-          });
+        changeAttr(
+          'apiKey',
+          '5cc87b12d7c5370001c1d65574b4bb71771c48848d7b79e21e26d756',
+        );
 
         const map = document.getElementById('map');
         const evts = document.getElementById('events');

@@ -7,7 +7,9 @@ const propTypes = {
 };
 
 const CasaRoutePopup = ({ feature }) => {
-  const content = feature.get('route').popupContent;
+  const route = feature.get('route');
+  const content = (typeof route === 'string' ? JSON.parse(route) : route)
+    .popupContent;
 
   return (
     <div className="wkp-casa-route-popup">
@@ -23,7 +25,8 @@ const CasaRoutePopup = ({ feature }) => {
 CasaRoutePopup.propTypes = propTypes;
 
 CasaRoutePopup.renderTitle = feature => {
-  const route = feature.get('route');
+  let route = feature.get('route');
+  route = typeof route === 'string' ? JSON.parse(route) : route;
   return route.popupTitle || 'Informationen';
 };
 
