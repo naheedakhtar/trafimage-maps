@@ -1,8 +1,30 @@
 import MapboxLayer from 'react-spatial/layers/MapboxLayer';
 
 class TrafimageMapboxLayer extends MapboxLayer {
+  constructor(options) {
+    super(options);
+    this.firstSymbolLayerId = null;
+  }
+
   init(map) {
     super.init(map);
+
+    if (this.mbMap) {
+      // Move all symbol and circle symbol on top.
+      this.mbMap.once('load', () => {
+        const styles = [...this.mbMap.getStyle().layers];
+
+        for (let i = 0; i < styles.length; i += 1) {
+          const style = styles[i];
+          if (/symbol|circle/i.test(style.type)) {
+            if (!this.firstSymmbolLayerId) {
+              this.firstSymmbolLayerId = style.id;
+            }
+            this.mbMap.moveLayer(style.id);
+          }
+        }
+      });
+    }
 
     if (this.map) {
       this.dispatchEvent({
