@@ -124,7 +124,7 @@ class Map extends PureComponent {
 
     layerService.getFeatureInfoAtCoordinate(coordinate).then((newInfos) => {
       let infos = newInfos.filter(({ features }) => features.length);
-      map.getTarget().style.cursor = infos.length ? 'pointer' : 'auto';
+      (map.getTarget() || {}).style.cursor = infos.length ? 'pointer' : 'auto';
 
       const isClickInfoOpen =
         featureInfo.length &&

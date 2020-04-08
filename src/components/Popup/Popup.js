@@ -24,7 +24,7 @@ const Popup = () => {
     return false;
   });
 
-  if (!filtered.length) {
+  if (!filtered.length || !map.getTarget()) {
     return null;
   }
 
