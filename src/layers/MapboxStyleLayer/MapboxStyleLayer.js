@@ -72,7 +72,30 @@ class MapboxStyleLayer extends Layer {
 
   init(map) {
     super.init(map);
+    if (!map) {
+      return;
+    }
 
+    if (map.getTarget()) {
+      this.loadMapboxStyleLayer();
+    }
+    map.on('change:target', () => this.loadMapboxStyleLayer());
+  }
+
+  terminate(map) {
+    const { mbMap } = this.mapboxLayer;
+    if (!mbMap) {
+      return;
+    }
+
+    mbMap.off('load', this.onLoad);
+    if (this.isMbMapLoaded) {
+      this.removeStyleLayers();
+    }
+    super.terminate(map);
+  }
+
+  loadMapboxStyleLayer() {
     // Apply the initial visibiltity.
     const { mbMap } = this.mapboxLayer;
     if (!mbMap) {
@@ -116,19 +139,6 @@ class MapboxStyleLayer extends Layer {
       //     this.addDynamicFilters();
       //   }),
     );
-  }
-
-  terminate(map) {
-    const { mbMap } = this.mapboxLayer;
-    if (!mbMap) {
-      return;
-    }
-
-    mbMap.off('load', this.onLoad);
-    if (this.isMbMapLoaded) {
-      this.removeStyleLayers();
-    }
-    super.terminate(map);
   }
 
   addStyleLayers() {
