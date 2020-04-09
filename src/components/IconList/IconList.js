@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import List from '@geops/react-ui/components/List';
 import Button from '@geops/react-ui/components/Button';
 import { FaCaretUp, FaCaretDown } from 'react-icons/fa';
-import { withTranslation } from 'react-i18next';
 
 import './IconList.scss';
 
@@ -24,7 +23,7 @@ const propTypes = {
 
   onSelect: PropTypes.func.isRequired,
   displayOnTop: PropTypes.bool,
-  t: PropTypes.func.isRequired,
+  t: PropTypes.func,
 };
 
 const defaultProps = {
@@ -35,6 +34,7 @@ const defaultProps = {
     width: 42,
   },
   displayOnTop: false,
+  t: (t) => t,
 };
 
 class IconList extends PureComponent {
@@ -226,4 +226,4 @@ class IconList extends PureComponent {
 IconList.propTypes = propTypes;
 IconList.defaultProps = defaultProps;
 
-export default withTranslation('translation', { withRef: true })(IconList);
+export default IconList;
