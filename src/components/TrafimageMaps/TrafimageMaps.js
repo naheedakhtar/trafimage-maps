@@ -12,7 +12,11 @@ import Layer from 'react-spatial/layers/Layer';
 import TopicLoader from '../TopicLoader';
 import { getStore } from '../../model/store';
 import { setZoom, setCenter, setMaxExtent } from '../../model/map/actions';
-import { setLanguage, setCartaroOldUrl } from '../../model/app/actions';
+import {
+  setLanguage,
+  setCartaroOldUrl,
+  setPermalinkActive,
+} from '../../model/app/actions';
 
 const propTypes = {
   /**
@@ -115,6 +119,12 @@ const propTypes = {
   enableTracking: PropTypes.bool,
 
   /**
+   * Enable permalink.
+   * @private
+   */
+  enablePermalink: PropTypes.bool,
+
+  /**
    * Key of the active topic.
    * @private
    */
@@ -137,6 +147,7 @@ const defaultProps = {
   topics: null,
   language: 'de',
   enableTracking: false,
+  enablePermalink: false,
   activeTopicKey: null,
 };
 
@@ -168,6 +179,7 @@ class TrafimageMaps extends React.PureComponent {
       center,
       language,
       enableTracking,
+      enablePermalink,
       cartaroOldUrl,
       maxExtent,
     } = this.props;
@@ -192,6 +204,10 @@ class TrafimageMaps extends React.PureComponent {
       this.store.dispatch(setLanguage(language));
     }
 
+    if (enablePermalink) {
+      this.store.dispatch(setPermalinkActive(enablePermalink));
+    }
+
     if (matomo && enableTracking) {
       matomo.trackPageView();
     }
@@ -203,6 +219,7 @@ class TrafimageMaps extends React.PureComponent {
       center,
       cartaroOldUrl,
       enableTracking,
+      enablePermalink,
       maxExtent,
     } = this.props;
 
@@ -220,6 +237,10 @@ class TrafimageMaps extends React.PureComponent {
 
     if (maxExtent !== prevProps.maxExtent) {
       this.store.dispatch(setMaxExtent(maxExtent));
+    }
+
+    if (enablePermalink !== prevProps.enablePermalink) {
+      this.store.dispatch(setPermalinkActive(enablePermalink));
     }
 
     if (matomo && !prevProps.enableTracking && enableTracking) {

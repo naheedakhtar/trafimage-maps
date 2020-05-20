@@ -13,8 +13,14 @@ export const SET_SEARCH_SERVICE = 'SET_SEARCH_SERVICE';
 export const SET_PERMISSIONS_INFOS = 'SET_PERMISSIONS_INFOS';
 export const SET_CARTARO_OLD_URL = 'SET_CARTARO_OLD_URL';
 export const SET_IS_MOBILE_WIDTH = 'SET_IS_MOBILE_WIDTH';
+export const SET_PERMALINK_ACTIVE = 'SET_PERMALINK_ACTIVE';
 
 export const setTopics = (data) => ({ type: SET_TOPICS, data });
+
+export const setPermalinkActive = (data) => ({
+  type: SET_PERMALINK_ACTIVE,
+  data,
+});
 
 export const setActiveTopic = (data) => ({ type: SET_ACTIVE_TOPIC, data });
 

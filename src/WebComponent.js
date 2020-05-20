@@ -110,7 +110,12 @@ const propTypes = {
   /**
    * Enable analytics tracking.
    */
-  enableTracking: PropTypes.bool,
+  enableTracking: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
+
+  /**
+   * Enable permalink.
+   */
+  enablePermalink: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
 };
 
 const attributes = {
@@ -131,11 +136,19 @@ const attributes = {
   staticFilesUrl: process.env.REACT_APP_STATIC_FILES_URL,
   permissionUrl: null,
   enableTracking: false,
+  enablePermalink: false,
 };
 
 const defaultProps = {
   topics: undefined,
   history: undefined,
+};
+
+const toBoolean = (value) => {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+  return value === 'true';
 };
 
 const WebComponent = (props) => {
@@ -151,6 +164,7 @@ const WebComponent = (props) => {
     apiKey,
     vectorTilesKey,
     enableTracking,
+    enablePermalink,
   } = props;
 
   const arrayCenter = useMemo(() => {
@@ -164,6 +178,7 @@ const WebComponent = (props) => {
     apiKey,
     vectorTilesKey,
   ]);
+
   const floatZoom = useMemo(() => zoom && parseFloat(zoom), [zoom]);
 
   const extentArray = useMemo(
@@ -176,7 +191,18 @@ const WebComponent = (props) => {
     if (!topics && appName === 'none') {
       return null;
     }
-    const tps = topics || getTopicConfig(apiKey, appName);
+    let tps = topics;
+
+    if (!tps) {
+      tps = getTopicConfig(apiKey, appName);
+
+      if (!tps) {
+        // eslint-disable-next-line no-console
+        console.warn(`There is no topics for app name: ${appName}.`);
+        return null;
+      }
+    }
+
     if (!tps) {
       // eslint-disable-next-line no-console
       console.error('You must provide a list of topics');
@@ -224,6 +250,7 @@ const WebComponent = (props) => {
           maxExtent={extentArray}
           center={arrayCenter}
           enableTracking={enableTracking}
+          enablePermalink={toBoolean(enablePermalink)}
         />
       </div>
     </Styled>

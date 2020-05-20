@@ -18,6 +18,7 @@ import {
   SET_PERMISSIONS_INFOS,
   SET_CARTARO_OLD_URL,
   SET_IS_MOBILE_WIDTH,
+  SET_PERMALINK_ACTIVE,
 } from './actions';
 import SearchService from '../../components/Search/SearchService';
 
@@ -130,6 +131,11 @@ export default function app(state = getInitialState(), action) {
       return {
         ...state,
         isMobileWidth: action.data,
+      };
+    case SET_PERMALINK_ACTIVE:
+      return {
+        ...state,
+        isPermalinkActive: action.data,
       };
     default:
       return {

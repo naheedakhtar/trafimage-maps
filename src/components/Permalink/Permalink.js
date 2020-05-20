@@ -31,6 +31,7 @@ const propTypes = {
   map: PropTypes.instanceOf(OLMap).isRequired,
   layerService: PropTypes.instanceOf(LayerService).isRequired,
   departuresFilter: PropTypes.string,
+  isPermalinkActive: PropTypes.bool,
 
   // mapDispatchToProps
   dispatchSetLanguage: PropTypes.func.isRequired,
@@ -45,6 +46,7 @@ const defaultProps = {
   appBaseUrl: null,
   initialState: {},
   departuresFilter: undefined,
+  isPermalinkActive: false,
 };
 
 const format = new GeoJSON();
@@ -207,19 +209,21 @@ class Permalink extends PureComponent {
   }
 
   render() {
-    const { history, layerService, map } = this.props;
+    const { history, layerService, map, isPermalinkActive } = this.props;
 
     return (
-      <RSPermalink
-        params={{ ...this.state }}
-        map={map}
-        layerService={layerService}
-        history={history}
-        isLayerHidden={(l) =>
-          l.get('hideInLegend') ||
-          layerService.getParents(l).some((pl) => pl.get('hideInLegend'))
-        }
-      />
+      isPermalinkActive && (
+        <RSPermalink
+          params={{ ...this.state }}
+          map={map}
+          layerService={layerService}
+          history={history}
+          isLayerHidden={(l) =>
+            l.get('hideInLegend') ||
+            layerService.getParents(l).some((pl) => pl.get('hideInLegend'))
+          }
+        />
+      )
     );
   }
 }
@@ -234,6 +238,7 @@ const mapStateToProps = (state) => ({
   language: state.app.language,
   layerService: state.app.layerService,
   departuresFilter: state.app.departuresFilter,
+  isPermalinkActive: state.app.isPermalinkActive,
 });
 
 const mapDispatchToProps = {
