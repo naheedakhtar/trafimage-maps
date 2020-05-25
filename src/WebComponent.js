@@ -136,7 +136,7 @@ const attributes = {
   staticFilesUrl: process.env.REACT_APP_STATIC_FILES_URL,
   permissionUrl: null,
   enableTracking: false,
-  enablePermalink: false,
+  enablePermalink: true,
 };
 
 const defaultProps = {
@@ -186,19 +186,17 @@ const WebComponent = (props) => {
     [maxExtent],
   );
   const appTopics = useMemo(() => {
-    // Wait for topics if no appName given
-    // Todo: Inspect more deeply on how to allow topic change in wkp.
-    if (!topics && appName === 'none') {
-      return null;
-    }
     let tps = topics;
 
     if (!tps) {
-      tps = getTopicConfig(apiKey, appName);
+      tps = getTopicConfig(appName);
 
       if (!tps) {
         // eslint-disable-next-line no-console
-        console.warn(`There is no topics for app name: ${appName}.`);
+        console.warn(`There is no public topics for app name: ${appName}.`);
+        // It's important to return null so the permalink doesn't try to update parameters.
+        // If we return [], it will try to update paramaters and we will loose the inital
+        // parameters when the topics will be loaded.
         return null;
       }
     }
@@ -227,7 +225,7 @@ const WebComponent = (props) => {
       tps[0].active = true;
     }
     return [...tps];
-  }, [activeTopicKey, appName, topics, apiKey]);
+  }, [activeTopicKey, appName, topics]);
 
   if (!appTopics) {
     return null;

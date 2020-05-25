@@ -147,7 +147,7 @@ const defaultProps = {
   topics: null,
   language: 'de',
   enableTracking: false,
-  enablePermalink: false,
+  enablePermalink: true,
   activeTopicKey: null,
 };
 

@@ -5,8 +5,8 @@ import { compose } from 'lodash/fp';
 import GeoJSON from 'ol/format/GeoJSON';
 import qs from 'query-string';
 import OLMap from 'ol/Map';
-import RSPermalink from 'react-spatial/components/Permalink';
 import LayerService from 'react-spatial/LayerService';
+import RSPermalink from 'react-spatial/components/Permalink';
 import { redirect } from '../../utils/redirectHelper';
 import { setCenter, setZoom } from '../../model/map/actions';
 import {
@@ -53,6 +53,57 @@ const format = new GeoJSON();
 
 class Permalink extends PureComponent {
   componentDidMount() {
+    const { isPermalinkActive } = this.props;
+    if (isPermalinkActive) {
+      this.readPermalink();
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    const {
+      activeTopic,
+      history,
+      departuresFilter,
+      layerService,
+      language,
+      isPermalinkActive,
+    } = this.props;
+
+    if (
+      isPermalinkActive &&
+      isPermalinkActive !== prevProps.isPermalinkActive
+    ) {
+      this.readPermalink();
+    }
+
+    if (history && activeTopic !== prevProps.activeTopic) {
+      history.replace(`/${activeTopic.key}${window.location.search}`);
+    }
+
+    if (departuresFilter !== prevProps.departuresFilter) {
+      this.updateDepartures();
+    }
+
+    if (language !== prevProps.language) {
+      this.updateLanguage();
+    }
+
+    if (this.loadDepartureOnce && this.departures) {
+      const dataLayer = layerService.getLayer('ch.sbb.netzkarte.data');
+      this.loadDepartureOnce = false;
+      if (dataLayer && dataLayer.mbMap) {
+        const { mbMap } = dataLayer;
+
+        // We need to wait until mapbox layer is loaded.
+        dataLayer.on('load', () => {
+          // then we wait the stations source has been updated.
+          mbMap.once('idle', this.openDepartureOnLoad.bind(this));
+        });
+      }
+    }
+  }
+
+  readPermalink() {
     const {
       appBaseUrl,
       dispatchSetZoom,
@@ -127,42 +178,6 @@ class Permalink extends PureComponent {
     });
   }
 
-  componentDidUpdate(prevProps) {
-    const {
-      activeTopic,
-      history,
-      departuresFilter,
-      layerService,
-      language,
-    } = this.props;
-
-    if (history && activeTopic !== prevProps.activeTopic) {
-      history.replace(`/${activeTopic.key}${window.location.search}`);
-    }
-
-    if (departuresFilter !== prevProps.departuresFilter) {
-      this.updateDepartures();
-    }
-
-    if (language !== prevProps.language) {
-      this.updateLanguage();
-    }
-
-    if (this.loadDepartureOnce && this.departures) {
-      const dataLayer = layerService.getLayer('ch.sbb.netzkarte.data');
-      this.loadDepartureOnce = false;
-      if (dataLayer && dataLayer.mbMap) {
-        const { mbMap } = dataLayer;
-
-        // We need to wait until mapbox layer is loaded.
-        dataLayer.on('load', () => {
-          // then we wait the stations source has been updated.
-          mbMap.once('idle', this.openDepartureOnLoad.bind(this));
-        });
-      }
-    }
-  }
-
   async openDepartureOnLoad() {
     const { layerService, dispatchSetFeatureInfo } = this.props;
     const dataLayer = layerService.getLayer('ch.sbb.netzkarte.data');
@@ -210,7 +225,6 @@ class Permalink extends PureComponent {
 
   render() {
     const { history, layerService, map, isPermalinkActive } = this.props;
-
     return (
       isPermalinkActive && (
         <RSPermalink

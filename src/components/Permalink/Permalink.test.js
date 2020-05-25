@@ -34,6 +34,7 @@ describe('Permalink', () => {
           }),
         ]),
         map: new Map({ view: new View({}) }),
+        isPermalinkActive: true,
       },
     });
   });
